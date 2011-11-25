@@ -54,7 +54,9 @@ namespace CommonDomain.Persistence.EventStore
 		{
 			var snapshot = this.GetSnapshot(id, versionToLoad);
 			var stream = this.OpenStream(id, versionToLoad, snapshot);
-			var aggregate = this.GetAggregate<TAggregate>(snapshot, stream);
+            if (stream.StreamRevision == 0)
+                throw new AggregateNotFoundException(string.Format("Aggregate with Id '{0}' does not exist in repository.", id));
+            var aggregate = this.GetAggregate<TAggregate>(snapshot, stream);
 
 			ApplyEventsToAggregate(versionToLoad, stream, aggregate);
 
