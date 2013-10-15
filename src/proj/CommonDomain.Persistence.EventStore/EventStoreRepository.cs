@@ -50,19 +50,30 @@ namespace CommonDomain.Persistence.EventStore
             return GetById<TAggregate>(id, int.MaxValue);
         }
 
+        public virtual TAggregate GetByIdOrDefault<TAggregate>(Guid id) where TAggregate : class, IAggregate
+        {
+            return GetById<TAggregate>(id, int.MaxValue, false);
+        }
+
 	    public virtual TAggregate GetById<TAggregate>(Guid id, int versionToLoad) where TAggregate : class, IAggregate
-		{
-			var snapshot = this.GetSnapshot(id, versionToLoad);
-			var stream = this.OpenStream(id, versionToLoad, snapshot);
-            if (stream.StreamRevision == 0)
-                throw new AggregateNotFoundException(string.Format("Aggregate with Id '{0}' does not exist in repository.", id));
-            var aggregate = this.GetAggregate<TAggregate>(snapshot, stream);
+	    {
+	        return GetById<TAggregate>(id, versionToLoad, true);
+	    }
 
-			ApplyEventsToAggregate(versionToLoad, stream, aggregate);
+        private TAggregate GetById<TAggregate>(Guid id, int versionToLoad, bool shouldThrowAggregateNotFoundException) where TAggregate : class, IAggregate
+	    {
+	        var snapshot = this.GetSnapshot(id, versionToLoad);
+	        var stream = this.OpenStream(id, versionToLoad, snapshot);
+	        if (stream.StreamRevision == 0 && shouldThrowAggregateNotFoundException)
+	            throw new AggregateNotFoundException(string.Format("Aggregate with Id '{0}' does not exist in repository.", id));
+	        var aggregate = this.GetAggregate<TAggregate>(snapshot, stream);
 
-			return aggregate as TAggregate;
-		}
-		private static void ApplyEventsToAggregate(int versionToLoad, IEventStream stream, IAggregate aggregate)
+	        ApplyEventsToAggregate(versionToLoad, stream, aggregate);
+
+	        return aggregate as TAggregate;
+	    }
+
+	    private static void ApplyEventsToAggregate(int versionToLoad, IEventStream stream, IAggregate aggregate)
 		{
 			if (versionToLoad == 0 || aggregate.Version < versionToLoad)
 				foreach (var @event in stream.CommittedEvents.Select(x => x.Body))
