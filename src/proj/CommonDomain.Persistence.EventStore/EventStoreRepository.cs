@@ -50,7 +50,7 @@ namespace CommonDomain.Persistence.EventStore
             return GetById<TAggregate>(id, int.MaxValue);
         }
 
-        public virtual TAggregate GetByIdOrDefault<TAggregate>(Guid id) where TAggregate : class, IAggregate
+        public virtual TAggregate GetByIdOrNew<TAggregate>(Guid id) where TAggregate : class, IAggregate
         {
             return GetById<TAggregate>(id, int.MaxValue, false);
         }
