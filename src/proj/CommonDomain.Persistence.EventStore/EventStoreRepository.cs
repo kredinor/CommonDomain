@@ -68,7 +68,12 @@ namespace CommonDomain.Persistence.EventStore
 	            throw new AggregateNotFoundException(string.Format("Aggregate with Id '{0}' does not exist in repository.", id));
 	        var aggregate = this.GetAggregate<TAggregate>(snapshot, stream);
 
-	        ApplyEventsToAggregate(versionToLoad, stream, aggregate);
+	        if (stream.StreamRevision == 0)
+	        {
+	            ((ISetAggregateId)aggregate).SetAggregateId(id);
+	        }
+
+            ApplyEventsToAggregate(versionToLoad, stream, aggregate);
 
 	        return aggregate as TAggregate;
 	    }

@@ -53,6 +53,7 @@
     <Compile Include="IDetectConflicts.cs" />
     <Compile Include="IMemento.cs" />
     <Compile Include="ISaga.cs" />
+    <Compile Include="ISetAggregateId.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -4,7 +4,7 @@ namespace CommonDomain.Core
 	using System.Collections;
 	using System.Collections.Generic;
 
-	public abstract class AggregateBase : IAggregate, IEquatable<IAggregate>
+	public abstract class AggregateBase : IAggregate, IEquatable<IAggregate>, ISetAggregateId
 	{
 		private readonly ICollection<object> uncommittedEvents = new LinkedList<object>();
 		private readonly IRouteEvents registeredRoutes = new ConventionEventRouter();
@@ -62,11 +62,18 @@ namespace CommonDomain.Core
 		{
 			return this.Id.GetHashCode();
 		}
-		public override bool Equals(object obj)
+
+	    void ISetAggregateId.SetAggregateId(Guid aggregateId)
+	    {
+	        Id = aggregateId;
+	    }
+
+	    public override bool Equals(object obj)
 		{
 			return this.Equals(obj as IAggregate);
 		}
-		public virtual bool Equals(IAggregate other)
+		
+        public virtual bool Equals(IAggregate other)
 		{
 			return null != other && other.Id == this.Id;
 		}
