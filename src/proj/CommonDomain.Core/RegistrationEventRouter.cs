@@ -3,7 +3,7 @@ namespace CommonDomain.Core
 	using System;
 	using System.Collections.Generic;
 
-	public class RegistrationEventRouter : IRouteEvents
+	public class RegistrationEventRouter : IRouteEvents, IProvideRoutedEventTypes
 	{
 	    private readonly bool _shouldThrowOnHandlerNotFound;
 	    private readonly IDictionary<Type, Action<object>> handlers = new Dictionary<Type, Action<object>>();
@@ -44,5 +44,10 @@ namespace CommonDomain.Core
 			    handler(eventMessage);
 			}
 		}
+
+	    public IEnumerable<Type> GetRoutedEventTypes()
+	    {
+	        return handlers.Keys;
+	    }
 	}
 }

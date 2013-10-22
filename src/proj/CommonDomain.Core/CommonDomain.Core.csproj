@@ -49,6 +49,8 @@
     <Compile Include="ConventionEventRouter.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="HandlerForDomainEventNotFoundException.cs" />
+    <Compile Include="IHaveEventRouter.cs" />
+    <Compile Include="IProvideRoutedEventTypes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegistrationEventRouter.cs" />
     <Compile Include="SagaBase.cs" />

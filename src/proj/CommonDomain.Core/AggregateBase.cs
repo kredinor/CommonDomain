@@ -4,7 +4,7 @@ namespace CommonDomain.Core
 	using System.Collections;
 	using System.Collections.Generic;
 
-	public abstract class AggregateBase : IAggregate, IEquatable<IAggregate>, ISetAggregateId
+	public abstract class AggregateBase : IAggregate, IEquatable<IAggregate>, ISetAggregateId, IHaveEventRouter
 	{
 		private readonly ICollection<object> uncommittedEvents = new LinkedList<object>();
 		private readonly IRouteEvents registeredRoutes = new ConventionEventRouter();
@@ -21,6 +21,8 @@ namespace CommonDomain.Core
 
 		public Guid Id { get; protected set; }
 		public int Version { get; protected set; }
+
+	    IRouteEvents IHaveEventRouter.EventRouter { get { return registeredRoutes; } }
 
 		protected void Register<T>(Action<T> route)
 		{
