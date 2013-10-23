@@ -34,10 +34,12 @@ namespace CommonDomain.Core
 			((IAggregate)this).ApplyEvent(@event);
 			this.uncommittedEvents.Add(@event);
 		}
-		void IAggregate.ApplyEvent(object @event)
+		
+        bool IAggregate.ApplyEvent(object @event)
 		{
-			this.registeredRoutes.Dispatch(@event);
+			var wasApplied = this.registeredRoutes.Dispatch(@event);
 			this.Version++;
+            return wasApplied;
 		}
 		ICollection IAggregate.GetUncommittedEvents()
 		{

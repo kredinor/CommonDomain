@@ -42,16 +42,19 @@ namespace CommonDomain.Core
 			}
 		}
 
-		public virtual void Dispatch(object eventMessage)
+		public virtual bool Dispatch(object eventMessage)
 		{
 			if (eventMessage == null)
 				throw new ArgumentNullException("eventMessage");
 
 			Action<object> handler;
             if (this.handlers.TryGetValue(eventMessage.GetType(), out handler))
-				handler(eventMessage);
-            else
-				this.registered.ThrowHandlerNotFound(eventMessage);
+            {
+                handler(eventMessage);
+                return true;
+            }
+		    this.registered.ThrowHandlerNotFound(eventMessage);
+		    return false;
 		}
 
 		private void Register(Type messageType, Action<object> handler)

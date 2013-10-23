@@ -7,6 +7,6 @@ namespace CommonDomain
 		void Register<T>(Action<T> handler);
 		void Register(IAggregate aggregate);
 
-		void Dispatch(object eventMessage);
+		bool Dispatch(object eventMessage);
 	}
 }

@@ -30,7 +30,7 @@ namespace CommonDomain.Core
 			this.registered = aggregate;
 		}
 
-		public virtual void Dispatch(object eventMessage)
+		public virtual bool Dispatch(object eventMessage)
 		{
 			Action<object> handler;
 
@@ -38,10 +38,12 @@ namespace CommonDomain.Core
 			{
                 if (_shouldThrowOnHandlerNotFound)
 			        this.registered.ThrowHandlerNotFound(eventMessage);
+			    return false;
 			}
 		    else
 			{
 			    handler(eventMessage);
+			    return true;
 			}
 		}
 

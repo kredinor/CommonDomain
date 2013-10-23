@@ -64,26 +64,34 @@ namespace CommonDomain.Persistence.EventStore
 	    {
 	        var snapshot = this.GetSnapshot(id, versionToLoad);
 	        var stream = this.OpenStream(id, versionToLoad, snapshot);
-	        if (stream.StreamRevision == 0 && shouldThrowAggregateNotFoundException)
-	            throw new AggregateNotFoundException(string.Format("Aggregate with Id '{0}' does not exist in repository.", id));
-	        var aggregate = this.GetAggregate<TAggregate>(snapshot, stream);
 
-	        if (stream.StreamRevision == 0)
-	        {
-	            ((ISetAggregateId)aggregate).SetAggregateId(id);
-	        }
+            var aggregate = this.GetAggregate<TAggregate>(snapshot, stream);
 
-            ApplyEventsToAggregate(versionToLoad, stream, aggregate);
+	        ((ISetAggregateId)aggregate).SetAggregateId(id);
+
+            var appliedAtLeastOneEvent = ApplyEventsToAggregate(versionToLoad, stream, aggregate);
+
+            if (appliedAtLeastOneEvent == false && shouldThrowAggregateNotFoundException)
+                throw new AggregateNotFoundException(string.Format("Aggregate with Id '{0}' does not exist in repository.", id));
+
+            if (aggregate.Id != id)
+                throw new InvalidOperationException(string.Format("Error loading aggregate of type {0}. The aggregate was fetched using id '{1}', but after replaying events the id changed to '{2}'.", typeof(TAggregate).Name, id, aggregate.Id));
 
 	        return aggregate as TAggregate;
 	    }
 
-	    private static void ApplyEventsToAggregate(int versionToLoad, IEventStream stream, IAggregate aggregate)
-		{
-			if (versionToLoad == 0 || aggregate.Version < versionToLoad)
-				foreach (var @event in stream.CommittedEvents.Select(x => x.Body))
-					aggregate.ApplyEvent(@event);
-		}
+	    private static bool ApplyEventsToAggregate(int versionToLoad, IEventStream stream, IAggregate aggregate)
+	    {
+	        bool appliedAtLeastOneEvent = false;
+            if (versionToLoad == 0 || aggregate.Version < versionToLoad)
+                foreach (var @event in stream.CommittedEvents.Select(x => x.Body))
+                    if (aggregate.ApplyEvent(@event))
+                        appliedAtLeastOneEvent = true;
+
+	        return appliedAtLeastOneEvent;
+
+	    }
+
 		private IAggregate GetAggregate<TAggregate>(Snapshot snapshot, IEventStream stream)
 		{
 			var memento = snapshot == null ? null : snapshot.Payload as IMemento;
