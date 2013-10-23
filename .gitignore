@@ -11,3 +11,5 @@ _ReSharper.*
 *.cache
 ~$*
 src/packages
+output-net40/
+src/CommonDomain.sln.DotSettings
